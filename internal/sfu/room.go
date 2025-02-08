@@ -48,6 +48,12 @@ func (r *Room) GetParticipant(id uuid.UUID) *Participant {
 func (r *Room) AddParticipant(p *Participant) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+
+	err := p.client.CreatePeerConnection()
+	if err != nil {
+		return err
+	}
+
 	r.participants[p.ID()] = p
 	return nil
 }
