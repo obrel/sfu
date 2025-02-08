@@ -48,7 +48,13 @@ func (rs roomResource) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	room := sfu.NewRoom(data.Name)
-	rs.sfu.Rooms[room.ID()] = room
+
+	err := rs.sfu.RegisterRoom(room)
+	if err != nil {
+		response.ErrUnprocessableEntity(w, err)
+		return
+	}
+
 	response.CreatedWithJSON(w, &response.RoomResponse{
 		ID:   room.ID(),
 		Name: room.Name(),
@@ -71,7 +77,7 @@ func (rs roomResource) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	room := rs.sfu.Rooms[id]
+	room := rs.sfu.GetRoom(id)
 
 	if room == nil {
 		response.ErrNotFound(w, "Room")
@@ -115,7 +121,12 @@ func (rs roomResource) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	delete(rs.sfu.Rooms, id)
+	err = rs.sfu.UnregisterRoom(id)
+	if err != nil {
+		response.ErrUnprocessableEntity(w, err)
+		return
+	}
+
 	response.OK(w)
 }
 
@@ -136,12 +147,12 @@ func (rs roomResource) Join(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rs.sfu.Rooms[id] == nil {
+	room := rs.sfu.GetRoom(id)
+
+	if room == nil {
 		response.ErrNotFound(w, "Room")
 		return
 	}
-
-	room := rs.sfu.Rooms[id]
 
 	pid, err := uuid.Parse(chi.URLParam(r, "pid"))
 	if err != nil {
@@ -156,7 +167,7 @@ func (rs roomResource) Join(w http.ResponseWriter, r *http.Request) {
 
 	participant := sfu.NewParticipant(rs.sfu.Clients[pid])
 
-	err = rs.sfu.Rooms[id].AddParticipant(participant)
+	err = room.AddParticipant(participant)
 	if err != nil {
 		response.ErrUnprocessableEntity(w, err)
 		return
@@ -195,7 +206,9 @@ func (rs roomResource) Leave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rs.sfu.Rooms[id] == nil {
+	room := rs.sfu.GetRoom(id)
+
+	if room == nil {
 		response.ErrNotFound(w, "Room")
 		return
 	}
@@ -206,14 +219,14 @@ func (rs roomResource) Leave(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rs.sfu.Clients[pid] == nil {
-		response.ErrNotFound(w, "Room")
+	participant := room.GetParticipant(pid)
+
+	if participant == nil {
+		response.ErrNotFound(w, "Clien")
 		return
 	}
 
-	participant := sfu.NewParticipant(rs.sfu.Clients[pid])
-
-	err = rs.sfu.Rooms[id].AddParticipant(participant)
+	err = room.RemoveParticipant(participant)
 	if err != nil {
 		response.ErrUnprocessableEntity(w, err)
 		return

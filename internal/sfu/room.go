@@ -39,6 +39,12 @@ func (r *Room) Participants() []*Participant {
 	return participants
 }
 
+func (r *Room) GetParticipant(id uuid.UUID) *Participant {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.participants[id]
+}
+
 func (r *Room) AddParticipant(p *Participant) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

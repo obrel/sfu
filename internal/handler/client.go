@@ -46,7 +46,13 @@ func (rs clientResource) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := sfu.NewClient(data.Name)
-	rs.sfu.Clients[client.ID()] = client
+
+	err := rs.sfu.RegisterClient(client)
+	if err != nil {
+		response.ErrUnprocessableEntity(w, err)
+		return
+	}
+
 	response.CreatedWithJSON(w, &response.ClientResponse{
 		ID:   client.ID(),
 		Name: client.Name(),
@@ -69,7 +75,7 @@ func (rs clientResource) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := rs.sfu.Clients[id]
+	client := rs.sfu.GetClient(id)
 
 	if client == nil {
 		response.ErrNotFound(w, "Client")
@@ -103,6 +109,11 @@ func (rs clientResource) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	delete(rs.sfu.Clients, id)
+	err = rs.sfu.UnregisterClient(id)
+	if err != nil {
+		response.ErrUnprocessableEntity(w, err)
+		return
+	}
+
 	response.OK(w)
 }
