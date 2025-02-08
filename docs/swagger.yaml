@@ -1,0 +1,210 @@
+definitions:
+  request.CreateClientRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  request.CreateRoomRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  response.ClientResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  response.ParticipantPayload:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  response.RoomResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/response.ParticipantPayload'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /clients:
+    post:
+      consumes:
+      - application/json
+      description: Create a new client
+      parameters:
+      - description: Create client
+        in: body
+        name: client
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateClientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ClientResponse'
+      summary: Create a new client
+      tags:
+      - clients
+  /clients/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a client
+      parameters:
+      - description: Client id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a client
+      tags:
+      - clients
+    get:
+      consumes:
+      - application/json
+      description: Create a client info
+      parameters:
+      - description: Client id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ClientResponse'
+      summary: Get a client info
+      tags:
+      - clients
+  /rooms:
+    post:
+      consumes:
+      - application/json
+      description: Create a new room
+      parameters:
+      - description: Create room
+        in: body
+        name: room
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RoomResponse'
+      summary: Create a new room
+      tags:
+      - rooms
+  /rooms/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a room
+      parameters:
+      - description: Room id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Delete a room
+      tags:
+      - rooms
+    get:
+      consumes:
+      - application/json
+      description: Create a room info
+      parameters:
+      - description: Room id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.RoomResponse'
+      summary: Get a room info
+      tags:
+      - rooms
+  /rooms/{id}/join/{pid}:
+    post:
+      consumes:
+      - application/json
+      description: Join to a room
+      parameters:
+      - description: Room id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Client id
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Join to a room
+      tags:
+      - rooms
+  /rooms/{id}/leave/{pid}:
+    delete:
+      consumes:
+      - application/json
+      description: Leave to a room
+      parameters:
+      - description: Room id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Client id
+        in: path
+        name: pid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Leave to a room
+      tags:
+      - rooms
+swagger: "2.0"
